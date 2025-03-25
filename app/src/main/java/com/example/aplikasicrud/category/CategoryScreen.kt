@@ -17,7 +17,7 @@ import androidx.compose.material.icons.filled.Delete
 fun CategoryScreen(viewModel: AppViewModel) {
     val categories by viewModel.categories.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
-    val items by viewModel.items.collectAsState()
+    val item by viewModel.items.collectAsState()
 
     Column {
         Button(onClick = { viewModel.addCategory("Category ${viewModel.categories.value.size + 1}") }) {

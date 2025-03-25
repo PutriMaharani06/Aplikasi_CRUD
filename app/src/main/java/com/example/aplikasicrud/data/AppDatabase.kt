@@ -1,10 +1,11 @@
 package com.example.aplikasicrud.data
+
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Category::class, Item::class], version = 1)
+@Database(entities = [Category::class, Item::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun appDao(): AppDao
 
@@ -17,7 +18,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "app_db"
+                    "app_database"
                 ).build()
                 INSTANCE = instance
                 instance

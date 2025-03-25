@@ -3,20 +3,20 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Delete
-import androidx.room.Index
-import com.example.aplikasicrud.data.Category
-import com.example.aplikasicrud.data.Item
+import androidx.room.OnConflictStrategy
+
 
 
 @Dao
 interface AppDao {
-    @Insert
-    suspend fun insertCategory(category: Category)
 
     @Insert
     suspend fun insertItem(item: Item)
 
-    @Query("SELECT * FROM Category")
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCategory(category: Category)
+
+    @Query("SELECT * FROM categories")
     suspend fun getCategories(): List<Category>
 
     @Query("SELECT * FROM items WHERE categoryId = :categoryId")

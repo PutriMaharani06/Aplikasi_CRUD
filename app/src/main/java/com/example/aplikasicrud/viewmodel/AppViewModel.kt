@@ -29,7 +29,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val items: StateFlow<List<Item>> = _items.asStateFlow()
 
     init {
-        loadCategories()
+        try {
+            loadCategories()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     fun loadCategories() {
