@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 
 
+
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val db = AppDatabase.getDatabase(application)
     private val repository = AppRepository(db.appDao())
@@ -22,19 +23,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
     val categories: StateFlow<List<Category>> = _categories.asStateFlow()
 
-    private val _selectedCategory = MutableStateFlow<Category?>(null)
-    val selectedCategory: StateFlow<Category?> = _selectedCategory.asStateFlow()
-
     private val _items = MutableStateFlow<List<Item>>(emptyList())
     val items: StateFlow<List<Item>> = _items.asStateFlow()
 
-    init {
-        try {
-            loadCategories()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+    init { loadCategories() }
 
     fun loadCategories() {
         viewModelScope.launch { _categories.value = repository.getCategories() }
@@ -51,10 +43,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addItem(name: String, categoryId: Int) {
+    fun updateCategory(category: Category) {
         viewModelScope.launch {
-            repository.insertItem(Item(name = name, categoryId = categoryId))
-            loadItems(categoryId)
+            repository.updateCategory(category)
+            loadCategories()
         }
     }
 
@@ -65,15 +57,24 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun addItem(name: String, categoryId: Int) {
+        viewModelScope.launch {
+            repository.insertItem(Item(name = name, categoryId = categoryId))
+            loadItems(categoryId)
+        }
+    }
+
+    fun updateItem(item: Item) {
+        viewModelScope.launch {
+            repository.updateItem(item)
+            loadItems(item.categoryId)
+        }
+    }
+
     fun deleteItem(item: Item) {
         viewModelScope.launch {
             repository.deleteItem(item)
             loadItems(item.categoryId)
         }
-    }
-
-    fun selectCategory(category: Category) {
-        _selectedCategory.value = category
-        loadItems(category.id)
     }
 }

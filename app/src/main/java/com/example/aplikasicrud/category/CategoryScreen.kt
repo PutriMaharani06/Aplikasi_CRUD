@@ -3,58 +3,76 @@ package com.example.aplikasicrud.category
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.aplikasicrud.viewmodel.AppViewModel
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import com.example.aplikasicrud.data.Category
 
 @Composable
-fun CategoryScreen(viewModel: AppViewModel) {
+fun CategoryScreen(viewModel: AppViewModel, onCategoryClick: (Category) -> Unit) {
     val categories by viewModel.categories.collectAsState()
-    val selectedCategory by viewModel.selectedCategory.collectAsState()
-    val item by viewModel.items.collectAsState()
+    var editCategory by remember { mutableStateOf<Category?>(null) }
+    var newName by remember { mutableStateOf("") }
 
-    Column {
-        Button(onClick = { viewModel.addCategory("Category ${viewModel.categories.value.size + 1}") }) {
-            Text("Add Category")
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Button(onClick = { viewModel.addCategory("Judul Catatan Baru") }) {
+            Text("Tambah Judul Catatan")
         }
-        LazyColumn {
-            items(categories) { category ->
-                Text(
-                    category.name,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            viewModel.selectCategory (category)
-                        }
-                        .padding(8.dp)
-                )
-            }
-        }
-        selectedCategory?.let { category ->
-            Text("Items in ${category.name}")
-            Button(onClick = { viewModel.addItem("Item ${viewModel.items.value.size + 1}", category.id) }) {
-                Text("Add Item")
-            }
-            LazyColumn {
-                items(viewModel.items.value) { item ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    ) {
-                        Text(item.name, modifier = Modifier.weight(1f))
-                        IconButton(onClick = { viewModel.deleteItem(item) }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete")
-                        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        categories.forEach { category ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .clickable { onCategoryClick(category) },
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = category.name, modifier = Modifier.weight(1f))
+                Row {
+                    Button(onClick = {
+                        editCategory = category
+                        newName = category.name
+                    }) {
+                        Text("Edit")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = { viewModel.deleteCategory(category) }) {
+                        Text("Hapus")
                     }
                 }
             }
         }
+    }
+
+    if (editCategory != null) {
+        AlertDialog(
+            onDismissRequest = { editCategory = null },
+            title = { Text("Edit Judul Catatan") },
+            text = {
+                OutlinedTextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    label = { Text("Judul Catatan") }
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    editCategory?.let {
+                        viewModel.updateCategory(it.copy(name = newName))
+                        editCategory = null
+                    }
+                }) {
+                    Text("Simpan")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { editCategory = null }) {
+                    Text("Batal")
+                }
+            }
+        )
     }
 }
